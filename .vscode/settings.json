@@ -1,0 +1,6 @@
+{
+    // Tell C/C++ extention to use C++17
+    "C_Cpp.default.cppStandard": "c++17",
+    // Set EOL to LF
+    "files.eol": "\n"
+}

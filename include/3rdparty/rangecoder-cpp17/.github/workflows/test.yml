@@ -1,0 +1,32 @@
+name: Google Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: create build directory
+      run: |
+        cd test
+        mkdir build
+    - name: download GoogleTest and build test
+      run: |
+        cd test/build
+        cmake ..
+        cmake --build .
+    - name: run test
+      run: test/build/rangecodertest
+
+  formatting-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clang-format style check for C/C++/Protobuf programs.
+      uses: jidicula/clang-format-action@v4.4.0
