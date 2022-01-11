@@ -325,10 +325,12 @@ class Predictor {
 template<typename T>
 class AdaptivePrediction {
  public:
-  explicit AdaptivePrediction(const Image_<T> &image,
+  explicit AdaptivePrediction(const uint_t max_num,
+                              const Image_<T> &image,
                               BasicParameterMap &basic_params_map,
                               const bool is_parallel = false) noexcept
-      : m_is_parallel(is_parallel),
+      : m_basic_param_map(basic_params_map),
+        m_is_parallel(is_parallel),
         m_references{
             TemplatePatch({3.0, 3.0}, PI * 0 / 9, TemplatePatch::ECLIPSE),
             TemplatePatch({6.7, 1.3}, PI * 0 / 9, TemplatePatch::ECLIPSE),
@@ -364,13 +366,15 @@ class AdaptivePrediction {
     constexpr auto is_sampling_train_pix = true;
     constexpr auto is_variable_train_window = true;
 
-    m_predictors.reserve(m_references.size());
+    m_predictors.reserve(max_num);
 
-    for (auto &reference : m_references)
-      m_predictors.emplace_back(Predictor(image, reference, basic_params_map, is_affine, is_sampling_train_pix, is_variable_train_window));
+    for (auto n = 0; n < max_num; ++n)
+      m_predictors.emplace_back(Predictor(image, m_references[n], basic_params_map, is_affine, is_sampling_train_pix, is_variable_train_window));
   };
 
-  void estimate(const Point &p, const uint_t max_num, int window_size) noexcept {
+  void estimate(const Point &p, int window_size) noexcept {
+    const auto max_num = m_predictors.size() + m_basic_param_map[p]->params().size();
+
     if (m_is_parallel) {
       auto threads = std::vector<std::thread>();
       threads.reserve(m_predictors.size());
@@ -389,7 +393,8 @@ class AdaptivePrediction {
  private:
   std::array<TemplatePatch, 25> m_references;
   std::vector<Predictor<T>> m_predictors;
-  bool m_is_parallel;
+  const BasicParameterMap &m_basic_param_map;
+  const bool m_is_parallel;
 };
 
 }// namespace pmo

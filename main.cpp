@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
       auto time_example_search = std::chrono::microseconds{};
       auto time_adaptive_prediction = std::chrono::microseconds{};
 
-      auto example_search = pmo::ExampleSearch(image, template_patch, basic_param_map);
-      auto adaptive_prediction = pmo::AdaptivePrediction(image, basic_param_map, is_parallel);
+      auto example_search = pmo::ExampleSearch(num_examples, image, template_patch, basic_param_map);
+      auto adaptive_prediction = pmo::AdaptivePrediction(num_predictors, image, basic_param_map, is_parallel);
 
       for (auto y = 0; y < image.height(); ++y) {
         for (auto x = 0; x < image.width(); ++x) {
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
           {// Example Search
             const auto start = std::chrono::high_resolution_clock::now();
 
-            example_search.estimate(target, num_examples, size_search_window, penalty);
+            example_search.estimate(target, size_search_window, penalty);
 
             const auto end = std::chrono::high_resolution_clock::now();
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
           {// Adaptive Prediction
             const auto start = std::chrono::high_resolution_clock::now();
 
-            adaptive_prediction.estimate(target, num_examples + num_predictors, size_train_window);
+            adaptive_prediction.estimate(target, size_train_window);
 
             const auto end = std::chrono::high_resolution_clock::now();
 
@@ -128,19 +128,19 @@ int main(int argc, char *argv[]) {
       for (auto unit_id = 0; unit_id < model_param_map.num_units(); ++unit_id)
         decoder.decode_model_parameter(unit_id);
 
-      auto example_search = pmo::ExampleSearch(image, template_patch, basic_param_map);
-      auto adaptive_prediction = pmo::AdaptivePrediction(image, basic_param_map, is_parallel);
+      auto example_search = pmo::ExampleSearch(num_examples, image, template_patch, basic_param_map);
+      auto adaptive_prediction = pmo::AdaptivePrediction(num_predictors, image, basic_param_map, is_parallel);
 
       for (auto y = 0; y < image.height(); ++y) {
         for (auto x = 0; x < image.width(); ++x) {
           const auto target = pmo::Point(x, y);
 
           {// Example Search
-            example_search.estimate(target, num_examples, size_search_window, penalty);
+            example_search.estimate(target, size_search_window, penalty);
           }//
 
           {// Adaptive Prediction
-            adaptive_prediction.estimate(target, num_examples + num_predictors, size_train_window);
+            adaptive_prediction.estimate(target, size_train_window);
           }//
 
           decoder.decode_pix(target);

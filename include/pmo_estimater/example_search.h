@@ -10,10 +10,12 @@ namespace pmo {
 template<typename T>
 class ExampleSearch {
  public:
-  explicit ExampleSearch(const Image_<T> &image,
+  explicit ExampleSearch(const uint_t max_num,
+                         const Image_<T> &image,
                          const TemplatePatch &template_patch,
                          BasicParameterMap &basic_params_map) noexcept
-      : m_image(image),
+      : m_max_num(max_num),
+        m_image(image),
         m_causal_area(m_image.height(), m_image.width()),
         m_template_patch(template_patch),
         m_basic_param_map(basic_params_map),
@@ -24,9 +26,10 @@ class ExampleSearch {
 
   ExampleSearch &operator=(const ExampleSearch &) = delete;
 
-  void estimate(const Point &p, const uint_t max_num, const int window_size, const real_t penalty) noexcept {
+  void estimate(const Point &p, const int window_size, const real_t penalty) noexcept {
     constexpr auto flag = real_t{0};
 
+    const auto max_num = m_max_num + m_basic_param_map[p]->params().size();
     _calc_template(p);
 
     m_causal_area.locate(p, window_size).for_each([&](const Point &q) {
@@ -108,6 +111,7 @@ class ExampleSearch {
     return static_cast<real_t>(m_image[q]) - m_q + m_p;
   };
 
+  const uint_t m_max_num;
   const Image_<T> &m_image;
   CausalArea m_causal_area;
   const TemplatePatch &m_template_patch;
