@@ -29,6 +29,10 @@ class Encoder {
     const auto ud_8bit = UniformDistribution(256);
     const auto ud_16bit = UniformDistribution(65536);
 
+    // for file signature
+    for (const auto sign : {'P', 'M', 'O', char(2), char(2)})
+      m_header_num_bytes += m_range_encoder.encode(ud_8bit, sign);
+
     // for image status
     m_header_num_bytes += m_range_encoder.encode(ud_16bit, m_image.width() - 1);
     m_header_num_bytes += m_range_encoder.encode(ud_16bit, m_image.height() - 1);

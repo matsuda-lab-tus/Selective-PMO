@@ -38,6 +38,13 @@ class Decoder {
     const auto ud_8bit = UniformDistribution(256);
     const auto ud_16bit = UniformDistribution(65536);
 
+    //for file signature
+    for (const auto sign : {'P', 'M', 'O', char(2), char(2)})
+      if (m_range_decoder.decode(ud_8bit) != sign) {
+        std::cout <<"Input is not pmo file: " << m_bitstream << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
     // for image status
     const auto width = m_range_decoder.decode(ud_16bit) + 1;
     const auto height = m_range_decoder.decode(ud_16bit) + 1;
