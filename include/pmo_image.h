@@ -33,7 +33,8 @@ class Image_ {
       ifs >> PNM::load(m_image.data(), info);
 
     } else {
-      throw std::runtime_error("invalid image!");
+      std::cout <<"Input is invalid file: " << input << std::endl;
+      exit(EXIT_FAILURE);
     }
   };
 
